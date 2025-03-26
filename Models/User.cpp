@@ -16,3 +16,9 @@ void User::SetName(const std::string& name) {
 const std::string& User::GetName() const {
     return name;
 }
+UserRole User::GetRole() const {
+    return role;
+}
+void User::SetRole(const UserRole& user_role) {
+    role = user_role;
+}

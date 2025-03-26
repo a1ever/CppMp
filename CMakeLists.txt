@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(FinanceApp)
-
+set(CMAKE_CXX_STANDARD 20)
 # Include Google Test
 include(FetchContent)
 FetchContent_Declare(
@@ -19,11 +19,12 @@ add_library(cppMp
         Models/User.h
         Models/User.cpp
         DataAccess/Repository.h
-        Presentation/Interface.h
+        Presentation/HttpServer.h
         BusinessLogic/FinanceOperations.h
+        BusinessLogic/DeletionApprovalSystem.cpp
+        BusinessLogic/DeletionApprovalSystem.h
         BusinessLogic/Exceptions/UserException.h
         DataAccess/Repository.cpp
-        Presentation/Interface.cpp
         BusinessLogic/FinanceOperations.cpp)
 
 # Link the main application to the library

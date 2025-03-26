@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
 class FinanceOperationsTest : public ::testing::Test {
 protected:
-    FinanceOperationsTest() : operations(repository_)  {
+    FinanceOperationsTest() : operations(repository_, <#initializer#>) {
     }
 
     void SetUp() override {

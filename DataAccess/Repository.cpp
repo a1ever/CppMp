@@ -3,16 +3,16 @@
 //
 
 #include "Repository.h"
-void Repository::CreateUser(const std::string& name, double balance) {
-    std::lock_guard<std::mutex> lock(usersMutex);
+void Repository::CreateUser(const std::string& name, double balance, UserRole role) {
+    std::unique_lock<std::shared_mutex> lock(usersMutex);
     if (users.find(name) != users.end()) {
         throw std::runtime_error("User already defined");
     }
-    users.insert({name, User(name, balance)});
+    users.insert({name, User(name, balance, role)});
 }
 
 void Repository::UpdateUser(const std::string& name, double balance) {
-    std::lock_guard<std::mutex> lock(usersMutex);
+    std::unique_lock<std::shared_mutex> lock(usersMutex);
     auto it = users.find(name);
     if (it != users.end()) {
         it->second.SetBalance(balance);
@@ -21,10 +21,17 @@ void Repository::UpdateUser(const std::string& name, double balance) {
 }
 
 const User& Repository::GetUser(const std::string& name) {
-    std::lock_guard<std::mutex> lock(usersMutex);
+    std::shared_lock<std::shared_mutex> lock(usersMutex);
     auto it = users.find(name);
     if (it != users.end()) {
         return it->second;
     }
     throw std::runtime_error("User not found");
+}
+
+void Repository::DeleteUser(const std::string& username)  {
+    std::unique_lock<std::shared_mutex> lock(usersMutex);
+    if (users.erase(username) == 0) {
+        throw std::runtime_error("User not found");
+    }
 }
