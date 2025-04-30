@@ -21,7 +21,7 @@ public:
         bool operator==(const std::string& uname) const { return username == uname; }
     };
 
-    void requestDeletion(std::string requester, std::string username);
+    void requestDeletion(const std::string& requester, const std::string& username);
 
     bool waitForApproval(const std::string& username, std::chrono::seconds timeout);
 
@@ -33,7 +33,7 @@ private:
     const int REQUIRED_APPROVALS = 1;
     mutable std::mutex mutex_;
     std::condition_variable cv_;
-    std::vector<DeletionRequest> requests_;
+    std::unordered_map<std::string, DeletionRequest> requests_map_;
 };
 
 #endif //FINANCEAPP_BUSINESSLOGIC_DELETIONAPPROVALSYSTEM_H_

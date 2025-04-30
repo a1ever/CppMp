@@ -25,21 +25,21 @@ void FinanceOperations::SubtractUserMoney(const std::string& name, double amount
     throw UserBalanceIsLessThanAmount(name, user.GetBalance(), amount);
 }
 
-void FinanceOperations::CreateUser(const std::string& name, double base_amount, UserRole role) {
+void FinanceOperations::CreateUser(const std::string& name, const std::string& password,  double base_amount, UserRole role) {
     try {
-        repository_.CreateUser(name, base_amount, role);
+        repository_.CreateUser(name, password, base_amount, role);
     } catch (std::exception& e){
         std::cout<<e.what();
         throw UserAlreadyExistsException(name);
     }
 }
 
-void FinanceOperations::CreateUser(const std::string& name, double base_amount) {
-    CreateUser(name, base_amount, UserRole::USER);
+void FinanceOperations::CreateUser(const std::string& name, const std::string& password, double base_amount) {
+    CreateUser(name, password, base_amount, UserRole::USER);
 }
 
-void FinanceOperations::CreateAdminUser(const std::string& name, double base_amount) {
-    CreateUser(name, base_amount, UserRole::ADMIN);
+void FinanceOperations::CreateAdminUser(const std::string& name, const std::string& password, double base_amount) {
+    CreateUser(name, password, base_amount, UserRole::ADMIN);
 }
 
 const User& FinanceOperations::GetUser(const std::string& name) {
@@ -64,37 +64,39 @@ std::vector<DeletionApprovalSystem::DeletionRequest> FinanceOperations::GetPendi
 
 void FinanceOperations::ApproveDeletion(const std::string& admin, const std::string& username) {
     try {
-        // Проверяем что approving user действительно admin
         if (repository_.GetUser(admin).GetRole() != UserRole::ADMIN) {
             throw std::runtime_error("Only admins can approve deletions");
         }
 
         approvalSystem_.approveDeletion(username);
-        //std::cout << "Admin " << admin << " approved deletion of " << username << "\n";
     } catch (const std::exception& e) {
-        //std::cout << "Approval error: " << e.what() << "\n";
         throw;
     }
 }
 
 void FinanceOperations::RequestUserDeletion(const std::string& requester, const std::string& username) {
     try {
-        // Если пользователь пытается удалить себя
-        if (requester == username) {
-            approvalSystem_.requestDeletion(requester, username);
-
-            // Ожидаем подтверждения
-            if (!approvalSystem_.waitForApproval(username, std::chrono::minutes(5))) {
-                throw std::runtime_error("Deletion request timed out");
+        if (requester != username) {
+            if (repository_.GetUser(requester).GetRole() != UserRole::ADMIN)
+            {
+                throw std::runtime_error("Only admins can delete others");
             }
         }
 
-        // Выполняем удаление
-        repository_.DeleteUser(username);
-        std::cout << "User " << username << " deleted successfully\n";
+        approvalSystem_.requestDeletion(repository_.GetUser(requester).GetName(), repository_.GetUser(username).GetName());
 
+        if (!approvalSystem_.waitForApproval(username, std::chrono::seconds(60))) {
+            throw std::runtime_error("Deletion request timed out");
+        }
+
+        repository_.DeleteUser(username);
     } catch (const std::exception& e) {
         std::cout << "Deletion error: " << e.what() << "\n";
         throw;
     }
+}
+
+std::vector<User> FinanceOperations::GetAllUsers()
+{
+    return repository_.GetAllUsers();
 }

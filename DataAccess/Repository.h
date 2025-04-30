@@ -15,11 +15,13 @@
 
 class Repository {
 public:
-    void CreateUser(const std::string& name, double balance, UserRole role);
+    void CreateUser(const std::string& name, const std::string& password, double balance, UserRole role);
 
     void UpdateUser(const std::string& name, double balance);
 
     const User& GetUser(const std::string& name);
+
+    std::vector<User> GetAllUsers();
 
     void DeleteUser(const std::string& username);
 private:

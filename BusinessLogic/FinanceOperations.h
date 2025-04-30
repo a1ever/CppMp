@@ -18,17 +18,18 @@ public:
 
     void SubtractUserMoney(const std::string& name, double amount);
 
-    void CreateUser(const std::string& name, double base_amount, UserRole role);
-    void CreateUser(const std::string& name, double base_amount);
+    void CreateUser(const std::string& name, const std::string& password, double base_amount, UserRole role);
+    void CreateUser(const std::string& name, const std::string& password, double base_amount);
 
-    void CreateAdminUser(const std::string& name, double base_amount);
+    void CreateAdminUser(const std::string& name, const std::string& password, double base_amount);
 
     const User& GetUser(const std::string& name);
 
+    std::vector<DeletionApprovalSystem::DeletionRequest> GetPendingApprovals(const std::string& admin);
     void RequestUserDeletion(const std::string& requester, const std::string& username);
+    std::vector<User> GetAllUsers();
 
     void ApproveDeletion(const std::string& admin, const std::string& username);
-    std::vector<DeletionApprovalSystem::DeletionRequest> GetPendingApprovals(const std::string& admin);
 
 
     explicit FinanceOperations(Repository& repository, DeletionApprovalSystem& approval_system)

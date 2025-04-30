@@ -7,12 +7,12 @@
 
 #include <string>
 #include <optional>
+
 enum class UserRole {
     USER,    // Обычный пользователь
     ADMIN    // Администратор рассматривающий удаления
 };
 
-// Функция для преобразования в строку (удобно для логирования)
 inline std::string userRoleToString(UserRole role) {
     switch(role) {
         case UserRole::USER: return "USER";
@@ -21,7 +21,6 @@ inline std::string userRoleToString(UserRole role) {
     }
 }
 
-// Функция для парсинга из строки (удобно для обработки вводов)
 inline std::optional<UserRole> userRoleFromString(const std::string& str) {
     if (str == "USER") return UserRole::USER;
     if (str == "ADMIN") return UserRole::ADMIN;

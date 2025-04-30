@@ -17,7 +17,6 @@ protected:
     }
 
     void SetUp() override {
-        // Настройка перед каждым тестом
         operations.CreateUser("Alice", 1000);
         operations.CreateUser("Bob", 500);
     }

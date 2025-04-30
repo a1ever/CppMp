@@ -4,41 +4,37 @@
 
 #include "DeletionApprovalSystem.h"
 
-void DeletionApprovalSystem::requestDeletion(std::string requester, std::string username) {
+void DeletionApprovalSystem::requestDeletion(const std::string& requester, const std::string& username) {
     std::lock_guard lock(mutex_);
-    requests_.push_back({std::move(requester), std::move(username), 0});
-    cv_.notify_all();
+
+    if (requests_map_.find(username) != requests_map_.end()) {
+        throw std::runtime_error("Deletion request for username '" + username + "' already exists");
+    }
+
+    requests_map_[username] = { requester, username, 0 };
 }
 
 bool DeletionApprovalSystem::waitForApproval(const std::string& username, std::chrono::seconds timeout) {
     std::unique_lock lock(mutex_);
     auto pred = [&] {
-        return std::ranges::any_of(requests_, [&](const DeletionRequest& req) {
-            return req.username == username && req.approval_count >= REQUIRED_APPROVALS;
-        });
-    };
+        auto it = requests_map_.find(username);
+        return it != requests_map_.end() && it->second.approval_count >= REQUIRED_APPROVALS;
+        };
 
     if (!cv_.wait_for(lock, timeout, pred)) {
+        requests_map_.erase(username);
         return false;
     }
 
-    // Удаляем подтвержденный запрос
-    std::erase_if(requests_, [&](const auto& req) {
-        return req.username == username;
-    });
-
+    requests_map_.erase(username);
     return true;
 }
 
 void DeletionApprovalSystem::approveDeletion(const std::string& username) {
     std::unique_lock lock(mutex_);
-    auto it = std::ranges::find_if(requests_,
-                                   [&](const DeletionRequest& req) {
-                                       return req.username == username;
-                                   });
-
-    if (it != requests_.end()) {
-        it->approval_count++;
+    auto it = requests_map_.find(username);
+    if (it != requests_map_.end()) {
+        it->second.approval_count++;
     }
 
     lock.unlock();
@@ -47,5 +43,10 @@ void DeletionApprovalSystem::approveDeletion(const std::string& username) {
 
 std::vector<DeletionApprovalSystem::DeletionRequest> DeletionApprovalSystem::getPendingRequests() const {
     std::lock_guard lock(mutex_);
-    return requests_;
+    std::vector<DeletionRequest> result;
+    result.reserve(requests_map_.size());
+    for (const auto& [_, request] : requests_map_) {
+        result.push_back(request);
+    }
+    return result;
 }

@@ -13,6 +13,14 @@ double User::GetBalance() const {
 void User::SetName(const std::string& name) {
     User::name = name;
 }
+const std::string& User::GetPassword() const
+{
+    return password;
+}
+void User::SetPassword(const std::string& password)
+{
+    User::password = password;
+}
 const std::string& User::GetName() const {
     return name;
 }

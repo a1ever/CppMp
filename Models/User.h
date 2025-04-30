@@ -10,17 +10,20 @@
 
 class User {
 public:
-    User(const std::string& name, double balance, UserRole userRole)
-        : name(name), balance(balance), role(userRole) {}
+    User(const std::string& name, const std::string& password, double balance, UserRole userRole)
+        : name(name), password(password), balance(balance), role(userRole) { }
 
     const std::string& GetName() const;
     void SetName(const std::string& name);
+    const std::string& GetPassword() const;
+    void SetPassword(const std::string& password);
     double GetBalance() const;
     void SetBalance(double balance);
     UserRole GetRole() const;
     void SetRole(const UserRole& user_role);
 private:
     std::string name;
+    std::string password;
     double balance;
     UserRole role;
 };
